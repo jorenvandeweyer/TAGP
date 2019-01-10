@@ -10,6 +10,9 @@ init(Req0, Opts) ->
 	Req = handler(Path, Method, HasBody, Req0),
 	{ok, Req, Opts}.
 
+handler([<<"test">> | _], <<"GET">>, _, Req) ->
+	Content = test:get(),
+	request:reply(json, Content, Req);
 handler([<<"dupbit">> | Path ], <<"GET">>, _, Req) ->
 	PartUrl = string:join([binary_to_list(X) || X <- Path], "/"),
 	Content = request:post("https://dupbit.com/api/" ++ PartUrl, {[

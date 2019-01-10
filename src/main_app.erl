@@ -11,7 +11,7 @@
 %% API.
 
 start(_Type, _Args) ->
-	pipe_system:start(),
+	% pipe_system:start(),
 	Dispatch = cowboy_router:compile([
 		{'_', [
 			{"/", cowboy_static, {priv_file, main, "html/index.html"}},

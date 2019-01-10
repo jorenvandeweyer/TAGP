@@ -14,7 +14,10 @@ start(_Type, _Args) ->
 	pipe_system:start(),
 	Dispatch = cowboy_router:compile([
 		{'_', [
-			{"/", toppage_h, []}
+			{"/", cowboy_static, {priv_file, main, "html/index.html"}},
+			{"/api/[...]", api_handler, []},
+			{"/assets/[...]", cowboy_static, {priv_dir, main, "/assets"}},
+			{"/[...]", cowboy_static, {priv_dir, main, "/html"}}
 		]}
 	]),
 	PrivDir = code:priv_dir(main),

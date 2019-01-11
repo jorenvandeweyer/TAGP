@@ -10,8 +10,11 @@ init(Req0, Opts) ->
 	Req = handler(Path, Method, HasBody, Req0),
 	{ok, Req, Opts}.
 
-handler([<<"test">> | _], <<"GET">>, _, Req) ->
-	Content = test:get(),
+handler([<<"pipes">> | _], <<"GET">>, _, Req) ->
+	Content0 = gen_server:call(pipe_system, {get, pipes}),
+	Content = jiffy:encode({[
+		{<<"pids">>, convert:pid_to_bin(list, Content0)}
+	]}),
 	request:reply(json, Content, Req);
 handler([<<"dupbit">> | Path ], <<"GET">>, _, Req) ->
 	PartUrl = string:join([binary_to_list(X) || X <- Path], "/"),
@@ -22,19 +25,5 @@ handler([<<"dupbit">> | Path ], <<"GET">>, _, Req) ->
 handler([<<"ip">> | _], <<"GET">>, _, Req) ->
 	Content = request:get("https://dupbit.com/api/ip"),
 	request:reply(text, Content, Req);
-handler([<<"pipe">> | _], <<"GET">>, _, Req) ->
-	Content = jiffy:encode({[
-		{<<"REST">>, <<"GET">>}, 
-		{<<"PATH">>, <<"pipe">>}
-	]}),
-	request:reply(json, Content, Req);	
-handler([<<"connectors">> | _], <<"GET">>, _, Req) ->
-	Content = jiffy:encode({[
-		{<<"REST">>, <<"GET">>}, 
-		{<<"PATH">>, <<"connectors">>},
-		{<<"IN">>, <<"0.192">>},
-		{<<"OUT">>, <<"0.193">>}
-	]}),
-	request:reply(json, Content, Req);
 handler(_, _, _, Req) ->
 	request:reply(text, <<"boiiiii">>, Req).

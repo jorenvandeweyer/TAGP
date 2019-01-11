@@ -2,8 +2,6 @@
 -export([get/1, get/2, get/3, post/2, post/3]).
 -export([reply/3]).
 
-
-
 get(Url) ->
     {ok, {_Status, _Headers, Content}} = httpc:request(get, {
         Url, []

@@ -7,11 +7,12 @@
 
 start_link() ->
     survivor:start(),
-    observer:start(),
+    %observer:start(),
     gen_server:start_link({local, pipe_system}, pipe_system, [], []).
 
 init(_args) ->
-    {ok, PipeType_PID} = pipeTyp:create(),
+    % {ok, PipeType_PID} = pipeTyp:create(),
+    {ok, PipeType_PID} = resource_type:create(pipeTyp, []),
     {ok, #{pipes=>[], pipeType=>PipeType_PID}}.
 
 handle_cast(reset, _Data) ->

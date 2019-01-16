@@ -4,3 +4,5 @@ ebin/
 _rel/
 .erlang.mk/
 main.d
+/.idea/
+/priv/ssl/

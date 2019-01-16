@@ -35,8 +35,8 @@ loop(Host, State, FlowMeterTyp_Pid, ResInst_Pid) ->
 			loop(Host, State, FlowMeterTyp_Pid, ResInst_Pid);
 		{get_type, ReplyFn} -> 
 			ReplyFn(FlowMeterTyp_Pid),
-			loop(Host, State, FlowMeterTyp_Pid, ResInst_Pid);		
-		OtherMessage -> 
+			loop(Host, State, FlowMeterTyp_Pid, ResInst_Pid);
+		OtherMessage ->
 			ResInst_Pid ! OtherMessage,
 			loop(Host, State, FlowMeterTyp_Pid, ResInst_Pid)
 	end.

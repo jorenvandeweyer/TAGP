@@ -10,7 +10,7 @@ create(Host, HeatExchangerTyp_Pid, PipeInst_Pid, HE_link_spec) -> {ok, spawn(?MO
 init(Host, HeatExchangerTyp_Pid, PipeInst_Pid, HE_link_spec) -> 
 	{ok, State} = apply(resource_type, get_initial_state, [HeatExchangerTyp_Pid, self(), PipeInst_Pid]),
 									%  get_initial_state  (ResTyp_Pid,  ResInst_Pid, TypeOptions) 
-	survivor:entry({ pumpInst_created, State }),
+	survivor:entry({ heatExchangerInst_created, State }),
 	loop(Host, State, HeatExchangerTyp_Pid, PipeInst_Pid, HE_link_spec).
 
 

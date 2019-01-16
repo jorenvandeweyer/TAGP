@@ -11,15 +11,8 @@
 %% API.
 
 start(_Type, _Args) ->
-	pipe_system:start_link(),
-	pipe_system:create_pipe(),
-	pipe_system:create_pipe(),
-    pipe_system:create_pipe(),
-    pipe_system:create_pipe(),
-    pipe_system:connect_pipes(1, 2),
-    pipe_system:connect_pipes(2, 3),
-    pipe_system:connect_pipes(3, 4),
-    pipe_system:connect_pipes(4, 1),
+  digitaltwin:start_link(),
+
 	Dispatch = cowboy_router:compile([
 		{'_', [
 			{"/", cowboy_static, {priv_file, main, "html/index.html"}},
@@ -28,14 +21,20 @@ start(_Type, _Args) ->
 			{"/[...]", cowboy_static, {priv_dir, main, "/html"}}
 		]}
 	]),
-	PrivDir = code:priv_dir(main),
-	{ok, _} = cowboy:start_tls(https, [
-		{port, 8443},
-		{certfile, PrivDir ++ "/ssl/fullchain.pem"},
-		{keyfile, PrivDir ++ "/ssl/privkey.pem"}		
-	], #{
-		env => #{dispatch => Dispatch}
-	}),
+
+  {ok, _} = cowboy:start_clear(my_http_listener, [{port, 8443}], #{
+    env => #{dispatch => Dispatch}
+  }),
+
+	%rivDir = code:priv_dir(main),
+	%ok, _} = cowboy:start_tls(https, [
+	%	{port, 8443},
+	%	{certfile, PrivDir ++ "/ssl/fullchain.pem"},
+	%	{keyfile, PrivDir ++ "/ssl/privkey.pem"}
+	%, #{
+	%	env => #{dispatch => Dispatch}
+	%),
+
 	main_sup:start_link().
 
 stop(_State) ->

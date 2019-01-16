@@ -5,7 +5,7 @@ start() ->
 	register(survivor, spawn(?MODULE, init, [])).
 
 entry(Data)-> 
-	ets:insert(logboek, {{now(), self()}, Data}). 
+	ets:insert(logboek, {{erlang:system_time(), self()}, Data}). 
 
 init() -> 
 	ets:new(logboek, [named_table, ordered_set, public]),		

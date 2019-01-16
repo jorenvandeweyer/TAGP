@@ -13,7 +13,7 @@ init(Host, ResTyp_Pid) ->
 get_flow_influence(PipeInst_Pid) -> 
 	msg:get(PipeInst_Pid, get_flow_influence).
 
-loop(Host, State, ResTyp_Pid) -> 
+loop(Host, State, ResTyp_Pid) ->
 	receive
 		{get_connectors, ReplyFn} ->
 			{ok,C_List} = resource_type:get_connections_list(ResTyp_Pid, State), 

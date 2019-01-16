@@ -3,7 +3,7 @@
 -export([create/0, init/0, discover_circuit/1]).
 -export([get_resource_circuit/2]).
 
-create() -> spawn(?MODULE, init, []).
+create() -> {ok, spawn(?MODULE, init, [])}.
 
 init() -> 
 	survivor:entry(fluidTyp_created), 
@@ -33,7 +33,7 @@ loop() ->
 
 extract(C) -> extract(maps:next(maps:iterator(C)), #{}).
 
-extract({C, _ , Iter }, ResLoop) ->
+extract({C, _ , Iter}, ResLoop) ->
 		{ok, ResPid} = connector:get_ResInst(C),
 		extract(maps:next(Iter), ResLoop#{ResPid => processed});
 

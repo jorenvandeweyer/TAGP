@@ -6,7 +6,7 @@
 -export([init/2, test/0]). % for internal use only. 
 
 create(ResInst_Pid, ConnectTyp_Pid) -> 
-	spawn(?MODULE, init, [ResInst_Pid, ConnectTyp_Pid]).
+	spawn_link(?MODULE, init, [ResInst_Pid, ConnectTyp_Pid]).
 
 init(ResInst_Pid, ConnectTyp_Pid) -> 
 	survivor:entry(connector_created), 
@@ -32,7 +32,7 @@ get_type(Connector_Pid) ->
 discard(Connector_Pid) -> 
 	Connector_Pid ! discard. 
 	
-% Connectors do not survive their ResInst, nor do they 
+% Connectors do not survive their ResInst, nor do they --> spawn_link
 % move/change from one ResInst to another. 
 
 loop(ResInst_Pid, Connected_Pid, ConnectTyp_Pid) -> 

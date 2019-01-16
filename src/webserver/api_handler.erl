@@ -10,6 +10,10 @@ init(Req0, Opts) ->
 	Req = handler(Path, Method, HasBody, Req0),
 	{ok, Req, Opts}.
 
+handler([<<"data">> | _], <<"GET">>, _, Req) ->
+	Content0 = digitaltwin:get_data(),
+	Content = jiffy:encode(Content0),
+	request:reply(json, Content, Req);
 handler([<<"pipes">> | _], <<"GET">>, _, Req) ->
 	Content0 = digitaltwin:get_data(),
 	Content = jiffy:encode(Content0),

@@ -11,10 +11,8 @@ init(Req0, Opts) ->
 	{ok, Req, Opts}.
 
 handler([<<"pipes">> | _], <<"GET">>, _, Req) ->
-	Content0 = gen_server:call(pipe_system, {get, pipes}),
-	Content = jiffy:encode({[
-		{<<"pids">>, convert:pid_to_bin(list, Content0)}
-	]}),
+	Content0 = digitaltwin:get_data(),
+	Content = jiffy:encode(Content0),
 	request:reply(json, Content, Req);
 handler([<<"dupbit">> | Path ], <<"GET">>, _, Req) ->
 	PartUrl = string:join([binary_to_list(X) || X <- Path], "/"),

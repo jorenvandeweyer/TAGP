@@ -36,6 +36,9 @@ post(Url, Data) ->
 reply(json, ok, Req) ->
 	Content = jiffy:encode({[{status, true}]}),
     reply(json, Content, Req);
+reply(json, error, Req) ->
+    Content = jiffy:encode({[{status, false}]}),
+    reply(json, Content, Req);
 reply(json, Json, Req) ->
     cowboy_req:reply(200, #{
         <<"content-type">> => <<"application/json">>

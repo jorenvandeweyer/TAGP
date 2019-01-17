@@ -13,7 +13,7 @@ init(Req0, Opts) ->
 handler([<<"observer">> | _], <<"POST">>, _, Req) ->
 	observer:start(),
 	request:reply(json, ok, Req);
-handler([<<"observer">> | _], <<"POST">>, _, Req) ->
+handler([<<"test">> | _], <<"POST">>, _, Req) ->
 	digitaltwin:test(),
 	request:reply(json, ok, Req);
 handler([<<"system">> | _], <<"POST">>, true, Req) ->
@@ -35,4 +35,6 @@ handler([<<"dupbit">> | Path ], <<"GET">>, _, Req) ->
 	request:reply(json, Content, Req);
 handler([<<"ip">> | _], <<"GET">>, _, Req) ->
 	Content = request:get("https://dupbit.com/api/ip"),
-	request:reply(text, Content, Req).
+	request:reply(text, Content, Req);
+handler(_, _, _, Req) ->
+	request:reply(json, error, Req).

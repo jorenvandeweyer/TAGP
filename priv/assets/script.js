@@ -9,14 +9,17 @@ class System {
 
     async updateSystem() {
         this.resources = await request("/api/system", "GET");
+        this.visualise();       
         console.log(this);
         return this.resources;
     }
 
-    addInstance(type) {
-        return request("/api/system", "POST", {
+    async addInstance(type) {
+        const result = await request("/api/system", "POST", {
             type,
         });
+        await this.updateSystem();
+        return result;
     }
 
     addPipe() {
@@ -35,14 +38,12 @@ class System {
         return this.addInstance("pump");
     }
 
-    remove(index) {
-        return request("api/system", "DELETE", {
-            index,
-        });
+    removeLast() {
+        return this.addInstance("removeLast");
     }
 
-    removeLast() {
-
+    visualise() {
+        drawPipes(this);
     }
 }
 
@@ -58,14 +59,16 @@ async function request(path, method="get", data) {
     }).then(data => data.json());
 }
 
-function init() {
+async function init() {
     const system = new System();
 
-    addClickEvent("#addPipe", system.addPipe);
-    addClickEvent("#addFlowMeter", system.addFlowMeter);
-    addClickEvent("#addHeatExch", system.addHeatExch);
-    addClickEvent("#addPump", system.addPump);
-    addClickEvent("#removeLast", system.removeLast);
+    await system.updateSystem();
+
+    addClickEvent("#addPipe", () => system.addPipe());
+    addClickEvent("#addFlowMeter", () => system.addFlowMeter());
+    addClickEvent("#addHeatExch", () => system.addHeatExch());
+    addClickEvent("#addPump", () => system.addPump());
+    addClickEvent("#removeLast", () => system.removeLast());
 
     addClickEvent("#observer", () => {
         fetch("/api/observer", {method: "POST"});
@@ -73,9 +76,8 @@ function init() {
 
     addClickEvent("#test", () => {
         fetch("/api/test", {method: "POST"});
+        system.updateSystem();
     });
-
-    drawPipes(system);
 
     return system;
 }
@@ -83,7 +85,6 @@ function init() {
 const system = init();
 
 async function drawPipes(system) {
-    await system.updateSystem();
     const resources = system.resources;
     console.log(resources);
 

@@ -37,5 +37,7 @@ loop() ->
 			loop()
 	end. 
 
-flow(Flow, on)  -> (250 - 5 * Flow - 2 * Flow * Flow);
-flow(_Flow, off) -> 0. 
+flow(Flow, on)  ->
+	(250 - 5 * Flow - 2 * Flow * Flow);
+flow(_Flow, off) ->
+	0.

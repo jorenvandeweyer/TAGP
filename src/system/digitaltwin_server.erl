@@ -37,7 +37,7 @@ remove_LastResourceInst() ->
 get_LastResourceInst() ->
     ResourceInstances = get_ResourceInstances(),
     if
-      ResourceInstances =:= [] -> [];
+      ResourceInstances =:= [] -> {nok, []};
       true -> lists:last(ResourceInstances)
     end.
 
@@ -45,7 +45,7 @@ get_FirstResourceInst() ->
     ResourceInstances = get_ResourceInstances(),
     case ResourceInstances of
       [FirstResInst | _] -> FirstResInst;
-      _true -> []
+      _true -> {nok, []}
     end.
 
 set_ResourceType(TypSelector, ResTyp_Pid) ->

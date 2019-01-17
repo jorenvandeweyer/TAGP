@@ -2,7 +2,8 @@
 -behaviour(gen_server).
 
 -export([start_link/0, stop/0, get_ResourceInstances/0, add_ResourceInstance/2, get_FluidumInstance/0,
-    set_FluidumInstance/1, delete_AllResourceInstances/0, get_ResourceType/1, set_ResourceType/2]).
+    set_FluidumInstance/1, delete_AllResourceInstances/0, remove_LastResourceInst/0, get_LastResourceInst/0,
+    get_FirstResourceInst/0, get_ResourceType/1, set_ResourceType/2]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
     terminate/2, code_change/3]).
 
@@ -30,6 +31,23 @@ delete_AllResourceInstances() ->
 get_ResourceType(TypSelector) ->
     gen_server:call({global, ?MODULE}, {get_ResTyp, TypSelector}).
 
+remove_LastResourceInst() ->
+    gen_server:cast({global, ?MODULE}, remove_lastResInst).
+
+get_LastResourceInst() ->
+    ResourceInstances = get_ResourceInstances(),
+    if
+      ResourceInstances =:= [] -> [];
+      true -> lists:last(ResourceInstances)
+    end.
+
+get_FirstResourceInst() ->
+    ResourceInstances = get_ResourceInstances(),
+    case ResourceInstances of
+      [FirstResInst | _] -> FirstResInst;
+      _true -> []
+    end.
+
 set_ResourceType(TypSelector, ResTyp_Pid) ->
     gen_server:cast({global, ?MODULE}, {set_ResTyp, TypSelector, ResTyp_Pid}).
 
@@ -54,6 +72,15 @@ handle_cast({add_ResInst, InstSelector, ResInst_Pid}, Data) ->
         ResInstances =/= [] -> [{InstSelector, ResInst_Pid} | ResInstances]
     end,
     {noreply, {NewResInstances, FluidumInst, ResTypes}};
+handle_cast(remove_lastResInst, Data) ->
+    { ResInstances, FluidumInst, ResTypes} = Data,
+    if
+      ResInstances =:= [] -> {noreply, {ResInstances, FluidumInst, ResTypes}};
+      true ->
+        {NewResInstances, _} = lists:split(length(ResInstances) - 1, ResInstances),
+        {noreply, {NewResInstances, FluidumInst, ResTypes}}
+    end;
+
 handle_cast({set_FluidumInst, FluidumInst_Pid}, Data) ->
     { ResInstances, _FluidumInst, ResTypes} = Data,
     {noreply, {ResInstances, FluidumInst_Pid, ResTypes}};

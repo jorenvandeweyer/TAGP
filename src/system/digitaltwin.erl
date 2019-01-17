@@ -28,11 +28,29 @@ init_resources() ->
 
 get_data() ->
   ResourceInstances = lists:reverse(digitaltwin_server:get_ResourceInstances()),
-  get_data(ResourceInstances).
-get_data([]) -> #{resource_data=>[]};
-get_data([ResInst|_]) ->
-  {ok, [_IN, OUT]} = resource_instance:list_connectors(element(2,ResInst)),
-  fluidumTyp:discover_circuit(OUT).
+  case ResourceInstances of
+    [] -> #{resource_data=>[]};
+    [ResInst| _] ->
+      {ok, [IN, _OUT]} = resource_instance:list_connectors(element(2,ResInst)),
+      {ok, {_, Connectors}} = fluidumTyp:discover_circuit(IN),
+      get_data(maps:keys(Connectors), ResourceInstances, [])
+  end.
+
+get_data([], _ResourceInstances, Result) ->
+  Result;
+get_data([Connector | Remainder], ResourceInstances, Result) ->
+  Res = lists:foldl(fun(N, ResInst) ->
+                      {ok, [IN, OUT]} = resource_instance:list_connectors(element(2,N)),
+                      if
+                        (IN =:= Connector) or (OUT =:= Connector) ->
+                          N;
+                        true -> ResInst
+                      end
+                    end, no_ResInst, ResourceInstances),
+  case lists:member(Res, Result) of
+    true -> get_data(Remainder, ResourceInstances, Result);
+    false -> get_data(Remainder, ResourceInstances, [Res | Result])
+  end.
 
 connect_ResourceInstances([]) ->
   {ok, empty};
@@ -51,20 +69,36 @@ make_connection(ResInst_A, ResInst_B) ->
   {ok, [InB, _OutB]} = resource_instance:list_connectors(ResInst_B),
   connector:connect(OutA, InB), connector:connect(InB, OutA).
 
-make_flowMeter(ResInst_Pid, RealWorldCmdFn) ->
+make_flowMeter(RealWorldCmdFn) ->
+  PipeTyp_Pid = digitaltwin_server:get_ResourceType(pipeTyp),
+  {ok, PipeInst_Pid} = resource_instance:create(pipeInst, [digitaltwin, PipeTyp_Pid]),
   FlowMeterTyp_Pid = digitaltwin_server:get_ResourceType(flowMeterTyp),
-  {ok, FlowMeterInst_Pid} = resource_instance:create(flowMeterInst, [digitaltwin, FlowMeterTyp_Pid, ResInst_Pid, RealWorldCmdFn]),
+  {ok, FlowMeterInst_Pid} = resource_instance:create(flowMeterInst, [digitaltwin, FlowMeterTyp_Pid, PipeInst_Pid, RealWorldCmdFn]),
   digitaltwin_server:add_ResourceInstance(flowMeterInst, FlowMeterInst_Pid),
   {ok, FlowMeterInst_Pid}.
 
-make_heatExchanger() -> ok.
+make_heatExchanger() ->
+  PipeTyp_Pid = digitaltwin_server:get_ResourceType(pipeTyp),
+  {ok, PipeInst_Pid} = resource_instance:create(pipeInst, [digitaltwin, PipeTyp_Pid]),
+  HeatExchangerTyp_Pid = digitaltwin_server:get_ResourceType(heatExchangerTyp),
+  HE_link_spec = #{delta => 0.8},
+  {ok, HeatExchangerInst_Pid} = resource_instance:create(heatExchangerInst, [digitaltwin, HeatExchangerTyp_Pid, PipeInst_Pid, HE_link_spec]),
+  digitaltwin_server:add_ResourceInstance(heatExchangerInst, HeatExchangerInst_Pid),
+  {ok, heatExchangerInst}.
 
-make_pipe(ResTyp_Pid) ->
-  {ok, PipeInst_Pid} = resource_instance:create(pipeInst, [digitaltwin, ResTyp_Pid]),
+make_pipe() ->
+  PipeTyp_Pid = digitaltwin_server:get_ResourceType(pipeTyp),
+  {ok, PipeInst_Pid} = resource_instance:create(pipeInst, [digitaltwin, PipeTyp_Pid]),
   digitaltwin_server:add_ResourceInstance(pipeInst, PipeInst_Pid),
   {ok, PipeInst_Pid}.
 
-make_pump() -> ok.
+make_pump(RealWorldCmdFn) ->
+  PipeTyp_Pid = digitaltwin_server:get_ResourceType(pipeTyp),
+  {ok, PipeInst_Pid} = resource_instance:create(pipeInst, [digitaltwin, PipeTyp_Pid]),
+  PumpTyp_Pid = digitaltwin_server:get_ResourceType(pumpTyp),
+  {ok, PumpInst_Pid} = resource_instance:create(pumpInst, [digitaltwin, PumpTyp_Pid, PipeInst_Pid, RealWorldCmdFn]),
+  digitaltwin_server:add_ResourceInstance(pumpInst, PumpInst_Pid),
+  {ok, PumpInst_Pid}.
 
 set_fluidum(Root_ConnectorPid) ->
   FluidumTyp_Pid = digitaltwin_server:get_ResourceType(fluidumTyp),
@@ -72,65 +106,39 @@ set_fluidum(Root_ConnectorPid) ->
   digitaltwin_server:set_FluidumInstance(FluidumInst_Pid),
   {ok, FluidumInst_Pid}.
 
-add_resource(flowMeterInst) ->
-  FlowMeterTyp_Pid = digitaltwin_server:get_ResourceType(flowMeterTyp),
-  {ok, PipeInst_Pid} = make_pipe(FlowMeterTyp_Pid),
-  make_flowMeter(PipeInst_Pid, fun(Arg)-> Arg*2 end);
-add_resource(heatExchangerInst) -> ok;
-add_resource(pipeInst) -> test;
-add_resource(pumpInst) -> ok.
+add_resource(flowMeter) ->
+  {_, FirstResInst} = digitaltwin_server:get_FirstResourceInst(),
+  {_, LastResInst} = digitaltwin_server:get_LastResourceInst(),
+  {ok, FlowMeter_Pid} = make_flowMeter(fun(A) -> 2*A end),
+  connect_ResourceInstances([FirstResInst, FlowMeter_Pid, LastResInst]);
+add_resource(heatExchanger) ->
+  {_, FirstResInst} = digitaltwin_server:get_FirstResourceInst(),
+  {_, LastResInst} = digitaltwin_server:get_LastResourceInst(),
+  {ok, HeatExchanger_Pid} = make_heatExchanger(),
+  connect_ResourceInstances([FirstResInst, HeatExchanger_Pid, LastResInst]);
+add_resource(pipe) ->
+  {_, FirstResInst} = digitaltwin_server:get_FirstResourceInst(),
+  {_, LastResInst} = digitaltwin_server:get_LastResourceInst(),
+  {ok, Pipe_Pid} = make_pipe(),
+  connect_ResourceInstances([FirstResInst, Pipe_Pid, LastResInst]);
+add_resource(pump) ->
+  {_, FirstResInst} = digitaltwin_server:get_FirstResourceInst(),
+  {_, LastResInst} = digitaltwin_server:get_LastResourceInst(),
+  {ok, Pump_Pid} = make_pump(fun(A) -> 2*A end),
+  connect_ResourceInstances([FirstResInst, Pump_Pid, LastResInst]);
+add_resource(removeLast) ->
+  digitaltwin_server:remove_LastResourceInst(),
+  {_, FirstResInst} = digitaltwin_server:get_FirstResourceInst(),
+  {_, LastResInst} = digitaltwin_server:get_LastResourceInst(),
+  connect_ResourceInstances([FirstResInst, LastResInst]).
 
 test() ->
-  PipeTyp_Pid = digitaltwin_server:get_ResourceType(pipeTyp),
-  {ok, A} = make_pipe(PipeTyp_Pid), {ok, B} = make_pipe(PipeTyp_Pid), {ok, C} = make_pipe(PipeTyp_Pid), {ok, D} = make_pipe(PipeTyp_Pid),
+  {ok, A} = make_pipe(), {ok, B} = make_pipe(), {ok, C} = make_pipe(), {ok, D} = make_pipe(),
   {ok, [IN_A, OUT_A]} = resource_instance:list_connectors(A),
   {ok, [IN_B, _OUT_B]} = resource_instance:list_connectors(B),
   {ok, F_Pid} = set_fluidum(IN_A),
   {ok, [Loc_A]} = resource_instance:list_locations(A),
   location:arrival(Loc_A, F_Pid),
-  {ok, E} = make_pipe(PipeTyp_Pid),
-  {ok, FlowMeterInst_Pid} = make_flowMeter(E, fun(Arg)-> Arg*2 end),
+  {ok, FlowMeterInst_Pid} = make_flowMeter(fun(Arg)-> Arg*2 end),
   connect_ResourceInstances([A, B, C, D, FlowMeterInst_Pid, A]),
   {pipeA, A, outA, OUT_A, pipeB, B, inB, IN_B, pipeC, C, pipeD, D, f_pid, F_Pid, loc_A, Loc_A, flowmeterpid, FlowMeterInst_Pid}.
-
-%get_data() ->
-%  ResourceInstances = lists:reverse(digitaltwin_server:get_ResourceInstances()),
-%  #{resource_data => lists:reverse(get_data(ResourceInstances))}.
-%get_data([]) -> [];
-%get_data([ResInst]) ->
-%  [#{num => 1, type => element(1, ResInst)}];
-%get_data(ResourceInstances) ->
-%  [FirstResInst | _] = ResourceInstances,
-%  get_data(ResourceInstances, FirstResInst, [], FirstResInst).
-%get_data(ResourceInstances, ResInst, [], FirstResInst) ->
-%  {ok, [_ConnIN, ConnOUT]} = resource_instance:list_connectors(element(2, ResInst)),
-%  Connected = connector:get_connected(ConnOUT),
-%  case Connected of
-%    {error, _, _, _, _} ->
-%      [#{num => 1, type => element(1, ResInst)}];
-%    {ok, disconnected} -> [#{num => 1, type => element(1, ResInst)}];
-%    _Else ->
-%      {ok, NextResInst_Pid} = connector:get_ResInst(element(2, Connected)),
-%      NextResInst = lists:keyfind(NextResInst_Pid, 2, [spawn || ResourceInstances]),
-%      if
-%        NextResInst =:= false -> [#{num => 1, type => element(1, ResInst)}];
-%        true -> get_data(ResourceInstances, NextResInst, [#{num => 1, type => element(1, ResInst)}], FirstResInst)
-%      end
-%  end;
-%get_data(ResourceInstances, ResInst, Result, FirstResInst) ->
-%  [Prev_Result | _] = Result,
-%  {ok, [_ConnIN, ConnOUT]} = resource_instance:list_connectors(element(2, ResInst)),
-%  Connected = connector:get_connected(ConnOUT),
-%  case Connected of
-%    {error, _, _, _, _} ->
-%      [#{num => maps:get(num, Prev_Result)+1, type => element(1, ResInst)} | Result];
-%    {ok, disconnected} -> [#{num => maps:get(num, Prev_Result)+1, type => element(1, ResInst)} | Result];
-%    _Else ->
-%      {ok, NextResInst_Pid} = connector:get_ResInst(element(2, Connected)),
-%      NextResInst = lists:keyfind(NextResInst_Pid, 2, ResourceInstances),
-%      if
-%        NextResInst =:= false -> [#{num => maps:get(num, Prev_Result)+1, type => element(1, ResInst)} | Result];
-%        NextResInst =:= FirstResInst -> [#{num => maps:get(num, Prev_Result)+1, type => element(1, ResInst)} | Result];
-%        true -> get_data(ResourceInstances, NextResInst, [#{num => maps:get(num, Prev_Result)+1, type => element(1, ResInst)} | Result], FirstResInst)
-%      end
-%  end.

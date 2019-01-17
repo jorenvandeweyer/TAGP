@@ -135,13 +135,12 @@ async function init() {
 
     system.on("click", selectInstance);
     system.on("selected", (selected) => {
-        console.log(selected);
-        document.getElementById("info_title").innerHTML = "Info Window Pipe num" + selected;
-        document.getElementById("info_line1").innerHTML = "Flow Influence " + system.resources.info.flow_influence + " %";
-        document.getElementById("info_line2").innerHTML = "Pid: " + system.resources[selected].pid;
-        document.getElementById("info_line3").innerHTML = "Type: " + system.resources[selected].type;
+        document.querySelector("#info_title").innerText = `Info Window Pipe`;
+        document.querySelector("#info_line1").innerText = `Flow Influence ${selected.info.flow_influence}`;
+        document.querySelector("#info_line2").innerText = `Pid: ${selected.pid}`;
+        document.querySelector("#info_line3").innerText = `Type: ${selected.type}`;
+    });
 
-    })
     return system;
 }
 

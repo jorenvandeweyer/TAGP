@@ -71,6 +71,10 @@ function init() {
         fetch("/api/observer", {method: "POST"});
     });
 
+    addClickEvent("#test", () => {
+        fetch("/api/test", {method: "POST"});
+    });
+
     drawPipes(system);
 
     return system;

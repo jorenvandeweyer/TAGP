@@ -13,6 +13,9 @@ init(Req0, Opts) ->
 handler([<<"observer">> | _], <<"POST">>, _, Req) ->
 	observer:start(),
 	request:reply(json, ok, Req);
+handler([<<"observer">> | _], <<"POST">>, _, Req) ->
+	digitaltwin:test(),
+	request:reply(json, ok, Req);
 handler([<<"system">> | _], <<"POST">>, true, Req) ->
 	{ok, Body, Req0} = cowboy_req:read_body(Req),
 	Type = request:fromJson(Body, type),

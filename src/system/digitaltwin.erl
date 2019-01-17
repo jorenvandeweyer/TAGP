@@ -29,7 +29,7 @@ init_resources() ->
 get_data() ->
   ResourceInstances = lists:reverse(digitaltwin_server:get_ResourceInstances()),
   case ResourceInstances of
-    [] -> #{resource_data=>[]};
+    [] -> [];
     [ResInst| _] ->
       {ok, [IN, _OUT]} = resource_instance:list_connectors(element(2,ResInst)),
       {ok, {_, Connectors}} = fluidumTyp:discover_circuit(IN),
@@ -49,7 +49,7 @@ get_data([Connector | Remainder], ResourceInstances, Result) ->
                     end, no_ResInst, ResourceInstances),
   case lists:member(Res, Result) of
     true -> get_data(Remainder, ResourceInstances, Result);
-    false -> get_data(Remainder, ResourceInstances, [Res | Result])
+    false -> get_data(Remainder, ResourceInstances, [#{type=>element(1,Res), pid=>element(2,Res) } | Result])
   end.
 
 connect_ResourceInstances([]) ->

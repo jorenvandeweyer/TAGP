@@ -136,6 +136,11 @@ async function init() {
     system.on("click", selectInstance);
     system.on("selected", (selected) => {
         console.log(selected);
+        document.getElementById("info_title").innerHTML = "Info Window Pipe num" + selected;
+        document.getElementById("info_line1").innerHTML = "Flow Influence " + system.resources.info.flow_influence + " %";
+        document.getElementById("info_line2").innerHTML = "Pid: " + system.resources[selected].pid;
+        document.getElementById("info_line3").innerHTML = "Type: " + system.resources[selected].type;
+
     })
     return system;
 }

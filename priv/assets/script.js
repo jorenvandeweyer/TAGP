@@ -10,13 +10,34 @@ class Instance {
     }
 
     async getInfo() {
-        const data = await request(`/api/instance/${this.pid}`, "GET");
-        console.log(data);
+        this.info = await request(`/api/instance/${this.pid}`, "GET");
+        return this.info;
     }
 }
 
-class System {
+class EventListener {
     constructor() {
+        this.listeners = new Map();
+    }
+
+    emit(event, ...opts) {
+        if (!this.listeners.has(event)) return;
+        const fun = this.listeners.get(event);
+        fun(...opts);
+    }
+
+    on(event, fun) {
+        this.listeners.set(event, fun);
+    }
+
+    clear(event) {
+        this.listeners.delete(event);
+    }
+}
+
+class System extends EventListener {
+    constructor() {
+        super();
         this.resources = [];
     }
 
@@ -94,8 +115,18 @@ async function init() {
         system.updateSystem();
     });
 
+    addClickEvent("#canvas", (event) => {
+        system.emit("click", event.offsetX, event.offsetY);
+    });
+
+    system.on("click", (x, y) => {
+        console.log("x:", x, "y:", y);
+    });
+
     return system;
 }
+
+
 
 const system = init();
 

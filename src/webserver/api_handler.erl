@@ -31,9 +31,8 @@ handler([<<"system">> | _], <<"GET">>, _, Req) ->
 handler([<<"instance">>, PidString | _], <<"GET">>, _, Req) ->
 	Pid = convert:bin_to_pid(PidString),
 	Data = digitaltwin:get_resource_data(Pid),
-	survivor:entry({data, Data}),
-	% _Data = digitaltwin:get_resource_data(),
-	request:reply(json, ok, Req);
+	Content = jiffy:encode(Data),
+ 	request:reply(json, Content, Req);
 
 handler([<<"dupbit">> | Path ], <<"GET">>, _, Req) ->
 	PartUrl = string:join([binary_to_list(X) || X <- Path], "/"),

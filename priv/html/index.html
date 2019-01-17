@@ -2,20 +2,60 @@
 <html>
 <head>
     <title>Digital Twin</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        /* Create two unequal columns that floats next to each other */
+        .column {
+            float: left;
+            padding: 10px;
+            border-style: solid;
+        }
+
+        .left {
+            width: 40%;
+        }
+
+        .right {
+            width: 60%;
+        }
+
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+    </style>
 </head>
 <body>
-<p>Digital Twin -- test</p>
-<div>
-    <button id="observer">Open Observer</button><br><br>
-    <button id="test">Create Test</button><br><br>
-    <button id="addPipe">Add Pipe</button><br><br>
-    <button id="addFlowMeter">Add Flow Meter</button><br><br>
-    <button id="addHeatExch">Add Heat Exchanger</button><br><br>
-    <button id="addPump">Add Pump</button><br><br>
-    <button id="removeLast">Remove Last Resource Instance</button><br><br>
+<h1>Digital Twin</h1>
+<div class="row">
+    <div class="column left">
+        <button id="observer">Open Observer</button><br><br>
+        <button id="test">Create Test</button><br><br>
+        <button id="addPipe">Add Pipe</button><br><br>
+        <button id="addFlowMeter">Add Flow Meter</button><br><br>
+        <button id="addHeatExch">Add Heat Exchanger</button><br><br>
+        <button id="addPump">Add Pump</button><br><br>
+        <button id="removeLast">Remove Last Resource Instance</button><br><br>
+    </div>
+    <div class="column right" id="observer_div">
+        <b id="obs_title">Observer: </b><br>
+        <p id="obs_line1">line1</p>
+        <p id="obs_line2">line2</p>
+        <p id="obs_line3">line3</p><br>
+        <button id="turn_on">Turn on</button><br><br>
+        <button id="turn_off">Turn off</button><br><br>
+    </div>
 </div>
-
+<br><br>
 <canvas id="canvas"></canvas>
+
 <script src="assets/script.js"></script>
 </body>
 </html>
+

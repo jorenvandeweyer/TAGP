@@ -1,7 +1,7 @@
 -module(digitaltwin).
 
 -export([start_link/0, test/0]).
--export([init/0, init_resources/0, get_data/0, add_resource/1]).
+-export([init/0, init_resources/0, get_data/0, add_resource/1, get_resource_data/1]).
 
 start_link() ->
   Pid = spawn(?MODULE, init, []),
@@ -133,7 +133,9 @@ add_resource(pipe) ->
 add_resource(pump) ->
   {_, FirstResInst} = digitaltwin_server:get_FirstResourceInst(),
   {_, LastResInst} = digitaltwin_server:get_LastResourceInst(),
-  {ok, Pump_Pid} = make_pump(fun(A) -> 2*A end),
+  {ok, Pump_Pid} = make_pump(fun  (Flow, on) -> Flow*10;
+                                  (Flow, off) -> 0
+                             end),
   if
     (FirstResInst =:= []) or (LastResInst =:= []) -> {ok, Pump_Pid};
     true ->   connect_ResourceInstances([FirstResInst, Pump_Pid, LastResInst])
@@ -147,6 +149,9 @@ add_resource(removeLast) ->
     (FirstResInst =:= []) or (LastResInst =:= []) -> {ok, no_resources};
     true ->   connect_ResourceInstances([FirstResInst, LastResInst])
   end.
+
+get_resource_data(ResInst_Pid) -> ok.
+
 
 test() ->
   {ok, A} = make_pipe(), {ok, B} = make_pipe(), {ok, C} = make_pipe(), {ok, D} = make_pipe(),

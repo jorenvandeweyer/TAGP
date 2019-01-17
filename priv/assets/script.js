@@ -234,6 +234,8 @@ function selectInstance(x_canvas, y_canvas, system) {
             }
         }
     }
+
+    system.select(null);
 }
 
 async function drawPipes(system) {

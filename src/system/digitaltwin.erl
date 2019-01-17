@@ -49,7 +49,7 @@ get_data([Connector | Remainder], ResourceInstances, Result) ->
                     end, no_ResInst, ResourceInstances),
   case lists:member(Res, Result) of
     true -> get_data(Remainder, ResourceInstances, Result);
-    false -> get_data(Remainder, ResourceInstances, [#{type=>element(1,Res), pid=>element(2,Res) } | Result])
+    false -> get_data(Remainder, ResourceInstances, [#{type=>element(1,Res), pid=>convert:pid_to_bin(element(2,Res)) } | Result])
   end.
 
 connect_ResourceInstances([]) ->

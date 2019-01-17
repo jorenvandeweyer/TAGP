@@ -10,6 +10,9 @@ init(Req0, Opts) ->
 	Req = handler(Path, Method, HasBody, Req0),
 	{ok, Req, Opts}.
 
+handler([<<"observer">> | _], <<"POST">>, _, Req) ->
+	observer:start(),
+	request:reply(json, ok, Req);
 handler([<<"system">> | _], <<"POST">>, true, Req) ->
 	{ok, Body, Req0} = cowboy_req:read_body(Req),
 	Type = request:fromJson(Body, type),
@@ -17,7 +20,7 @@ handler([<<"system">> | _], <<"POST">>, true, Req) ->
 	digitaltwin:add_resource(Type),
 	request:reply(json, ok, Req0);
 handler([<<"system">> | _], <<"GET">>, _, Req) ->
-	{ok, Data} = digitaltwin:get_data(),
+	Data = digitaltwin:get_data(),
 	survivor:entry({get_data, Data}),
 	Content = jiffy:encode(Data),
 	request:reply(json, Content, Req);

@@ -8,9 +8,7 @@ class System {
     }
 
     async updateSystem() {
-        const data = await request("/api/system", "GET");
-        console.log(data);
-        this.resources = data.resource_data;
+        this.resources = await request("/api/system", "GET");
         console.log(this);
         return this.resources;
     }
@@ -69,6 +67,10 @@ function init() {
     addClickEvent("#addPump", system.addPump);
     addClickEvent("#removeLast", system.removeLast);
 
+    addClickEvent("#observer", () => {
+        fetch("/api/observer", {method: "POST"});
+    });
+
     drawPipes(system);
 
     return system;
@@ -86,6 +88,7 @@ async function drawPipes(system) {
     let canvas = document.querySelector("#canvas");
     let ctx = canvas.getContext("2d");
 
+    
     // let result = null,
     //     tmp = [];
     // location.search

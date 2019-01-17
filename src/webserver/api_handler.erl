@@ -26,6 +26,4 @@ handler([<<"dupbit">> | Path ], <<"GET">>, _, Req) ->
 	request:reply(json, Content, Req);
 handler([<<"ip">> | _], <<"GET">>, _, Req) ->
 	Content = request:get("https://dupbit.com/api/ip"),
-	request:reply(text, Content, Req);
-handler(_, _, _, Req) ->
-	request:reply(text, <<"boiiiii">>, Req).
+	request:reply(text, Content, Req).

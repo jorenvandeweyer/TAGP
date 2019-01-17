@@ -1,1 +1,1 @@
-rm -rf _rel/ .erlang.mk/ deps/ ebin/ 
+rm -rf _rel/ .erlang.mk/ deps/ ebin/

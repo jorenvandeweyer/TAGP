@@ -44,9 +44,14 @@ class System extends EventListener {
         this.selected = null;
     }
 
-    select(index) {
+    async select(index) {
         this.selected = this.resources[index];
-        this.emit("selected", this.selected);
+        if (this.selected) {
+            await this.selected.getInfo();
+            this.emit("selected", this.selected);
+        } else {
+            this.emit("unselected");
+        }
         this.visualise();
     }
 
@@ -129,7 +134,9 @@ async function init() {
     });
 
     system.on("click", selectInstance);
-
+    system.on("selected", (selected) => {
+        console.log(selected);
+    })
     return system;
 }
 

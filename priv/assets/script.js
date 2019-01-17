@@ -1,3 +1,6 @@
+const h = 70, w = 100, dist = 0;
+let selected = -1;
+
 function addClickEvent(id, fun) {
     document.querySelector(id).addEventListener("click", fun);
 }
@@ -119,8 +122,113 @@ async function init() {
         system.emit("click", event.offsetX, event.offsetY);
     });
 
-    system.on("click", (x, y) => {
-        console.log("x:", x, "y:", y);
+    system.on("click", (x_canvas, y_canvas) => {
+        console.log("x:", x_canvas, "y:", y_canvas);
+        const resources = system.resources;
+
+        const no_pipes = resources.length;
+        let top_side = 0, bottom_side = 0, left_side = 0, right_side = 0;
+
+        if (no_pipes < 4)
+            top_side = no_pipes;
+        else {
+            if (no_pipes < 8) {
+                top_side = 1;
+                bottom_side = 1;
+                right_side = 1;
+                left_side = 1;
+                switch (no_pipes - 4) {
+                    case 0:
+                        bottom_side--;
+                        top_side++;
+                        break;
+                    case 1:
+                        top_side++;
+                        break;
+                    case 2:
+                        top_side++;
+                        bottom_side++;
+                        break;
+                    case 3:
+                        top_side += 2;
+                        bottom_side++;
+                        break;
+                }
+            } else {
+                let sides = Math.floor((no_pipes - 4) / 4);
+                top_side = sides;
+                bottom_side = sides;
+                left_side = sides;
+                right_side = sides;
+                if (no_pipes % 4 == 0) {
+                    top_side += 2;
+                    bottom_side += 2;
+                } else {
+                    let rem = (no_pipes - 4) % 4;
+                    switch (rem) {
+                        case 1:
+                            left_side++;
+                            right_side++;
+                            top_side += 2;
+                            bottom_side++;
+                            break;
+                        case 2:
+                            left_side++;
+                            right_side++;
+                            top_side += 2;
+                            bottom_side += 2;
+                            break;
+                        case 3:
+                            left_side++;
+                            right_side++;
+                            top_side += 3;
+                            bottom_side += 2;
+                            break;
+                    }
+                }
+            }
+        }
+
+        let x,y;
+        for (let j = 0; j < no_pipes; j++) {
+            if (j < top_side) {
+                let i = j;
+                x = 10 + i * (w + dist);
+                y = 10;
+                if (x_canvas >= x && x_canvas <= x+w &&
+                    y_canvas >= y && y_canvas <= y+h) {
+                    selected = j;
+                } else selected = -1;
+            }
+            else if (j < top_side + right_side) {
+                let i = j - top_side;
+                x = 10 + (w - h) + (top_side - 1) * (w + dist);
+                y = 10 + dist + h + i * (dist + w);
+                if (x_canvas >= x && x_canvas <= x+h &&
+                    y_canvas >= y && y_canvas <= y+w) {
+                    selected = j;
+                } else selected = -1;
+            }
+            else if (j < top_side + right_side + bottom_side) {
+                let i = j - top_side - right_side;
+                x = 10 + i * (w + dist);
+                y = 10 + dist + h + (left_side) * (w + dist);
+                if (x_canvas >= x && x_canvas <= x+w &&
+                    y_canvas >= y && y_canvas <= y+h) {
+                    selected = j;
+                } else selected = -1;
+            }
+            else {
+                let i = j - top_side - right_side - bottom_side;
+                x = 10;
+                y = 10 + dist + h + i * (dist + w);
+                if (x_canvas >= x && x_canvas <= x+h &&
+                    y_canvas >= y && y_canvas <= y+w) {
+                    selected = j;
+                } else selected = -1;
+            }
+        }
+        console.log("selected: ", selected);
     });
 
     return system;
@@ -133,8 +241,6 @@ const system = init();
 async function drawPipes(system) {
     const resources = system.resources;
     console.log(resources);
-
-    let h = 70, w = 100, dist = 0;
 
     let c = document.querySelector("#canvas");
     let ctx = c.getContext("2d");
@@ -211,7 +317,7 @@ async function drawPipes(system) {
     c.height = height * dpi;
     ctx.scale(dpi, dpi);
 
-    for (let j = 0; j < (top_side + bottom_side + left_side + right_side); j++) {
+    for (let j = 0; j < no_pipes; j++) {
         let rotation = false;
         let x, y;
         if (j < top_side) {
@@ -255,22 +361,5 @@ async function drawPipes(system) {
 
     }
 }
-/**
- for (let i = 0; i<top_side; i++) {
-        ctx.strokeRect(10 + i*(w+dist), 10, w, h);
-      }
- for (let i = 0; i<bottom_side; i++) {
-        if (bottom_side==1) {
-          ctx.strokeRect(10+dist + w + i*(w+dist), 10+dist + h + (left_side)*(w+dist), w, h);
-        } else {
-          ctx.strokeRect(10 + i*(w+dist), 10+dist + h + (left_side)*(w+dist), w, h);
-        }
-      }
- for (let i = 0; i<left_side; i++) {
-        ctx.strokeRect(10, 10+dist + h + i*(dist+w), h, w);
-      }
- for (let i = 0; i<right_side; i++) {
-        ctx.strokeRect(10 + (w-h) + (top_side-1)*(w+dist), 10+dist + h + i*(dist+w), h, w);
-      }*/
 
       

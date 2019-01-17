@@ -1,7 +1,7 @@
 -module(digitaltwin).
 
 -export([start_link/0, test/0]).
--export([init/0, init_resources/0, get_data/0, add_resource/1, get_resource_data/1]).
+-export([init/0, init_resources/0, get_data/0, add_resource/1, get_resource_data/1, make_heatExchanger/0]).
 
 start_link() ->
   Pid = spawn(?MODULE, init, []),
@@ -87,7 +87,7 @@ make_heatExchanger() ->
   HE_link_spec = #{delta => 0.8},
   {ok, HeatExchangerInst_Pid} = resource_instance:create(heatExchangerInst, [digitaltwin, HeatExchangerTyp_Pid, PipeInst_Pid, HE_link_spec]),
   digitaltwin_server:add_ResourceInstance(heatExchangerInst, HeatExchangerInst_Pid),
-  {ok, heatExchangerInst}.
+  {ok, HeatExchangerInst_Pid}.
 
 make_pipe() ->
   PipeTyp_Pid = digitaltwin_server:get_ResourceType(pipeTyp),

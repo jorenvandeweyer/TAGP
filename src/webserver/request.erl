@@ -1,7 +1,7 @@
 -module(request).
 -export([get/1, get/2, get/3, post/2, post/3]).
 -export([reply/3]).
--export([fromJson/2]).
+-export([fromJson/2, fromJsonBool/2]).
 
 get(Url) ->
     {ok, {_Status, _Headers, Content}} = httpc:request(get, {
@@ -53,3 +53,8 @@ fromJson(Body, Key) ->
     KeyBin = erlang:atom_to_binary(Key, latin1),
     Type = proplists:get_value(KeyBin, Json),
     erlang:binary_to_atom(Type, latin1).
+fromJsonBool(Body, Key) ->
+    {Json} = jiffy:decode(Body),
+    KeyBin = erlang:atom_to_binary(Key, latin1),
+    Type = proplists:get_value(KeyBin, Json),
+    Type.

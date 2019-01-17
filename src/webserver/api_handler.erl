@@ -36,7 +36,17 @@ handler([<<"instance">>, PidString | _], <<"GET">>, _, Req) ->
 	Data = digitaltwin:get_resource_data(Pid),
 	Content = jiffy:encode(Data),
  	request:reply(json, Content, Req);
-
+handler([<<"instance">>, PidString | _], <<"POST">>, _, Req) ->
+	{ok, Body, Req0} = cowboy_req:read_body(Req),
+	Pid = convert:bin_to_pid(PidString),
+	On = request:fromJsonBool(Body, on),
+	if 
+		On -> 
+			pumpInst:switch_on(Pid);
+		true ->
+			pumpInst:switch_off(Pid)	
+	end,
+	request:reply(json, ok, Req0);
 handler([<<"dupbit">> | Path ], <<"GET">>, _, Req) ->
 	PartUrl = string:join([binary_to_list(X) || X <- Path], "/"),
 	Content = request:post("https://dupbit.com/api/" ++ PartUrl, {[

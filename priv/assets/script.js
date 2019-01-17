@@ -35,6 +35,22 @@ class Instance {
         this.info = await request(`/api/instance/${this.pid}`, "GET");
         return this.info;
     }
+
+    async on() {
+        if (this.type !== "pumpInst") return;
+        const data = await request(`/api/instance/${this.pid}`, "POST", {
+            on: true
+        });
+        return data;
+    }
+
+    async off() {
+        if (this.type !== "pumpInst") return;
+        const data = await request(`/api/instance/${this.pid}`, "POST", {
+            on: false
+        });
+        return data
+    }
 }
 
 class System extends EventListener {
@@ -53,6 +69,16 @@ class System extends EventListener {
             this.emit("unselected");
         }
         this.visualise();
+    }
+
+    async selectedOn() {
+        if (!this.selected) return;
+        this.selected.on();
+    }
+
+    async selectedOff() {
+        if (!this.selected) return;
+        this.selected.off();
     }
 
     async updateSystem() {
@@ -119,7 +145,8 @@ async function init() {
     addClickEvent("#addHeatExch", () => system.addHeatExch());
     addClickEvent("#addPump", () => system.addPump());
     addClickEvent("#removeLast", () => system.removeLast());
-
+    addClickEvent("#turn_on", () => system.selectedOn());
+    addClickEvent("#turn_off", () => system.selectedOff());
     addClickEvent("#observer", () => {
         fetch("/api/observer", {method: "POST"});
     });

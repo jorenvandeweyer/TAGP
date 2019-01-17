@@ -110,28 +110,43 @@ add_resource(flowMeter) ->
   {_, FirstResInst} = digitaltwin_server:get_FirstResourceInst(),
   {_, LastResInst} = digitaltwin_server:get_LastResourceInst(),
   {ok, FlowMeter_Pid} = make_flowMeter(fun(A) -> 2*A end),
-  connect_ResourceInstances([FirstResInst, FlowMeter_Pid, LastResInst]);
+  if
+    (FirstResInst =:= []) or (LastResInst =:= []) -> {ok, FlowMeter_Pid};
+    true -> connect_ResourceInstances([FirstResInst, FlowMeter_Pid, LastResInst])
+  end;
 add_resource(heatExchanger) ->
   {_, FirstResInst} = digitaltwin_server:get_FirstResourceInst(),
   {_, LastResInst} = digitaltwin_server:get_LastResourceInst(),
   {ok, HeatExchanger_Pid} = make_heatExchanger(),
-  connect_ResourceInstances([FirstResInst, HeatExchanger_Pid, LastResInst]);
+  if
+    (FirstResInst =:= []) or (LastResInst =:= []) -> {ok, HeatExchanger_Pid};
+    true ->   connect_ResourceInstances([FirstResInst, HeatExchanger_Pid, LastResInst])
+  end;
 add_resource(pipe) ->
   {_, FirstResInst} = digitaltwin_server:get_FirstResourceInst(),
   {_, LastResInst} = digitaltwin_server:get_LastResourceInst(),
   {ok, Pipe_Pid} = make_pipe(),
-  connect_ResourceInstances([FirstResInst, Pipe_Pid, LastResInst]);
+  if
+    (FirstResInst =:= []) or (LastResInst =:= []) -> {ok, Pipe_Pid};
+    true ->    connect_ResourceInstances([FirstResInst, Pipe_Pid, LastResInst])
+  end;
 add_resource(pump) ->
   {_, FirstResInst} = digitaltwin_server:get_FirstResourceInst(),
   {_, LastResInst} = digitaltwin_server:get_LastResourceInst(),
   {ok, Pump_Pid} = make_pump(fun(A) -> 2*A end),
-  connect_ResourceInstances([FirstResInst, Pump_Pid, LastResInst]);
+  if
+    (FirstResInst =:= []) or (LastResInst =:= []) -> {ok, Pump_Pid};
+    true ->   connect_ResourceInstances([FirstResInst, Pump_Pid, LastResInst])
+  end;
+
 add_resource(removeLast) ->
   digitaltwin_server:remove_LastResourceInst(),
   {_, FirstResInst} = digitaltwin_server:get_FirstResourceInst(),
   {_, LastResInst} = digitaltwin_server:get_LastResourceInst(),
-  connect_ResourceInstances([FirstResInst, LastResInst]).
-
+  if
+    (FirstResInst =:= []) or (LastResInst =:= []) -> {ok, no_resources};
+    true ->   connect_ResourceInstances([FirstResInst, LastResInst])
+  end.
 
 test() ->
   {ok, A} = make_pipe(), {ok, B} = make_pipe(), {ok, C} = make_pipe(), {ok, D} = make_pipe(),

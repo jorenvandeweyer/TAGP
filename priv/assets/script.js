@@ -2,15 +2,30 @@ function addClickEvent(id, fun) {
     document.querySelector(id).addEventListener("click", fun);
 }
 
+class Instance {
+    constructor(inst) {
+        this.pid = inst.pid;
+        this.type = inst.type;
+        // this.getInfo();
+    }
+
+    async getInfo() {
+        const data = await request(`/api/instance/${this.pid}`, "GET");
+        console.log(data);
+    }
+}
+
 class System {
     constructor() {
         this.resources = [];
     }
 
     async updateSystem() {
-        this.resources = await request("/api/system", "GET");
-        this.visualise();       
-        console.log(this);
+        const data = await request("/api/system", "GET");
+
+        this.resources = data.map(inst => new Instance(inst));
+
+        this.visualise();
         return this.resources;
     }
 

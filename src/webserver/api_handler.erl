@@ -13,20 +13,28 @@ init(Req0, Opts) ->
 handler([<<"observer">> | _], <<"POST">>, _, Req) ->
 	observer:start(),
 	request:reply(json, ok, Req);
+
 handler([<<"test">> | _], <<"POST">>, _, Req) ->
 	digitaltwin:test(),
 	request:reply(json, ok, Req);
+
 handler([<<"system">> | _], <<"POST">>, true, Req) ->
 	{ok, Body, Req0} = cowboy_req:read_body(Req),
 	Type = request:fromJson(Body, type),
-	survivor:entry({type, Type}),
 	digitaltwin:add_resource(Type),
 	request:reply(json, ok, Req0);
 handler([<<"system">> | _], <<"GET">>, _, Req) ->
 	Data = digitaltwin:get_data(),
-	survivor:entry({get_data, Data}),
 	Content = jiffy:encode(Data),
 	request:reply(json, Content, Req);
+
+handler([<<"instance">>, PidString | _], <<"GET">>, _, Req) ->
+	Pid = convert:bin_to_pid(PidString),
+	Data = digitaltwin:get_resource_data(Pid),
+	survivor:entry({data, Data}),
+	% _Data = digitaltwin:get_resource_data(),
+	request:reply(json, ok, Req);
+
 handler([<<"dupbit">> | Path ], <<"GET">>, _, Req) ->
 	PartUrl = string:join([binary_to_list(X) || X <- Path], "/"),
 	Content = request:post("https://dupbit.com/api/" ++ PartUrl, {[

@@ -132,6 +132,7 @@ add_resource(removeLast) ->
   {_, LastResInst} = digitaltwin_server:get_LastResourceInst(),
   connect_ResourceInstances([FirstResInst, LastResInst]).
 
+
 test() ->
   {ok, A} = make_pipe(), {ok, B} = make_pipe(), {ok, C} = make_pipe(), {ok, D} = make_pipe(),
   {ok, [IN_A, OUT_A]} = resource_instance:list_connectors(A),

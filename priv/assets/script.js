@@ -198,6 +198,7 @@ async function init() {
                 if (x_canvas >= x && x_canvas <= x+w &&
                     y_canvas >= y && y_canvas <= y+h) {
                     selected = j;
+                    break;
                 } else selected = -1;
             }
             else if (j < top_side + right_side) {
@@ -207,6 +208,7 @@ async function init() {
                 if (x_canvas >= x && x_canvas <= x+h &&
                     y_canvas >= y && y_canvas <= y+w) {
                     selected = j;
+                    break;
                 } else selected = -1;
             }
             else if (j < top_side + right_side + bottom_side) {
@@ -216,6 +218,7 @@ async function init() {
                 if (x_canvas >= x && x_canvas <= x+w &&
                     y_canvas >= y && y_canvas <= y+h) {
                     selected = j;
+                    break;
                 } else selected = -1;
             }
             else {
@@ -225,9 +228,11 @@ async function init() {
                 if (x_canvas >= x && x_canvas <= x+h &&
                     y_canvas >= y && y_canvas <= y+w) {
                     selected = j;
+                    break;
                 } else selected = -1;
             }
         }
+        drawPipes(system);
         console.log("selected: ", selected);
     });
 
@@ -318,6 +323,11 @@ async function drawPipes(system) {
     ctx.scale(dpi, dpi);
 
     for (let j = 0; j < no_pipes; j++) {
+        if (j == selected) {
+            ctx.save();
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = "#7D7D7D";
+        }
         let rotation = false;
         let x, y;
         if (j < top_side) {
@@ -358,7 +368,7 @@ async function drawPipes(system) {
             ctx.textAlign = "center"
             ctx.fillText(resources[j].type, x+h/2, y+w/2);
         }
-
+        ctx.restore();
     }
 }
 

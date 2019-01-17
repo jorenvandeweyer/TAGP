@@ -6,27 +6,13 @@
 <body>
 <p>Digital Twin -- test</p>
 <form name='form'>
-    <button type="submit" name="pipeInst" formmethod="post">Add Pipe</button><br><br>
-    <button type="flowMeterInst" name="add_flowMeter" formmethod="post">Add Flow Meter</button><br><br>
-    <button type="submit" name="add_heatExchanger" formmethod="post">Add Heat Exchanger</button><br><br>
-    <button type="submit" name="add_pump" formmethod="post">Add Pump</button><br><br>
-    <button type="submit" name="remove_ResInst" formmethod="post">Remove Last Resource Instance</button><br><br>
+    <button id="addPipe">Add Pipe</button><br><br>
+    <button id="addFlowMeter">Add Flow Meter</button><br><br>
+    <button id="addHeatExch">Add Heat Exchanger</button><br><br>
+    <button id="addPump">Add Pump</button><br><br>
+    <button id="removeLast">Remove Last Resource Instance</button><br><br>
 </form>
-<script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js'></script>
-<script type="text/javascript">
-    $(document).ready( function () {
-        $('form').submit( function () {
-            var formdata = $(this).serialize();
-            $.ajax({
-                type: "POST",
-                url: "/api/alter_system",
-                data: formdata,
-            });
-            return false;
-        });
-    });
-</script>
 <canvas id="canvas"></canvas>
-<script src="script.js"></script>
+<script src="assets/script.js"></script>
 </body>
 </html>

@@ -1,138 +1,212 @@
-drawPipes();
+function addClickEvent(id, fun) {
+    document.querySelector(id).addEventListener("click", fun);
+}
 
-function drawPipes() {
-    async () => {
-        const data = await fetch("/api/data").then(data => data.json()).then(console.log);
+class System {
+    constructor() {
+        this.resources = [];
     }
-    console.log(data);
-    let resources = data.resource_data;
+
+    async updateSystem() {
+        const data = await request("/api/system", "GET");
+        console.log(data);
+        this.resources = data.resource_data;
+        console.log(this);
+        return this.resources;
+    }
+
+    addInstance(type) {
+        return request("/api/system", "POST", {
+            type,
+        });
+    }
+
+    addPipe() {
+        return this.addInstance("pipe");
+    }
+
+    addFlowMeter() {
+        return this.addInstance("flowMeter"); 
+    }
+
+    addHeatExch() {
+        return this.addInstance("heatExchanger");
+    }
+
+    addPump() {
+        return this.addInstance("pump");
+    }
+
+    remove(index) {
+        return request("api/system", "DELETE", {
+            index,
+        });
+    }
+
+    removeLast() {
+
+    }
+}
+
+async function request(path, method="get", data) {
+    return fetch(path, {
+        method,
+        cache: "no-cache",
+        headers: {
+            "Content-Type": "application/json",
+
+        },
+        body: data ? JSON.stringify(data) : null,
+    }).then(data => data.json());
+}
+
+function init() {
+    const system = new System();
+
+    addClickEvent("#addPipe", system.addPipe);
+    addClickEvent("#addFlowMeter", system.addFlowMeter);
+    addClickEvent("#addHeatExch", system.addHeatExch);
+    addClickEvent("#addPump", system.addPump);
+    addClickEvent("#removeLast", system.removeLast);
+
+    drawPipes(system);
+
+    return system;
+}
+
+const system = init();
+
+async function drawPipes(system) {
+    await system.updateSystem();
+    const resources = system.rescources;
     console.log(resources);
+
     let h = 50, w = 80, dist = 0;
 
-    let c = document.getElementById("canvas");
-    let ctx = c.getContext("2d");
+    let canvas = document.querySelector("#canvas");
+    let ctx = canvas.getContext("2d");
 
-    let result = null,
-        tmp = [];
-    location.search
-        .substr(1)
-        .split("&")
-        .forEach(function (item) {
-            tmp = item.split("=");
-            if (tmp[0] === "no_pipes") result = decodeURIComponent(tmp[1]);
-        });
+    // let result = null,
+    //     tmp = [];
+    // location.search
+    //     .substr(1)
+    //     .split("&")
+    //     .forEach(function (item) {
+    //         tmp = item.split("=");
+    //         if (tmp[0] === "no_pipes") result = decodeURIComponent(tmp[1]);
+    //     });
 
-    let no_pipes = resources.length;
-    let top_side = 0, bottom_side = 0, left_side = 0, right_side = 0;
+    // let no_pipes = resources.length;
+    // let top_side = 0, bottom_side = 0, left_side = 0, right_side = 0;
 
-    if (no_pipes < 4)
-        top_side = no_pipes;
-    else {
-        if (no_pipes < 8) {
-            top_side = 1;
-            bottom_side = 1;
-            right_side = 1;
-            left_side = 1;
-            switch (no_pipes - 4) {
-                case 0:
-                    bottom_side--;
-                    top_side++;
-                    break;
-                case 1:
-                    top_side++;
-                    break;
-                case 2:
-                    top_side++;
-                    bottom_side++;
-                    break;
-                case 3:
-                    top_side += 2;
-                    bottom_side++;
-                    break;
-            }
-        } else {
-            let sides = Math.floor((no_pipes - 4) / 4);
-            top_side = sides;
-            bottom_side = sides;
-            left_side = sides;
-            right_side = sides;
-            if (no_pipes % 4 == 0) {
-                top_side += 2;
-                bottom_side += 2;
-            } else {
-                let rem = (no_pipes - 4) % 4;
-                switch (rem) {
-                    case 1:
-                        left_side++;
-                        right_side++;
-                        top_side += 2;
-                        bottom_side++;
-                        break;
-                    case 2:
-                        left_side++;
-                        right_side++;
-                        top_side += 2;
-                        bottom_side += 2;
-                        break;
-                    case 3:
-                        left_side++;
-                        right_side++;
-                        top_side += 3;
-                        bottom_side += 2;
-                        break;
-                }
-            }
-        }
-    }
+    // if (no_pipes < 4)
+    //     top_side = no_pipes;
+    // else {
+    //     if (no_pipes < 8) {
+    //         top_side = 1;
+    //         bottom_side = 1;
+    //         right_side = 1;
+    //         left_side = 1;
+    //         switch (no_pipes - 4) {
+    //             case 0:
+    //                 bottom_side--;
+    //                 top_side++;
+    //                 break;
+    //             case 1:
+    //                 top_side++;
+    //                 break;
+    //             case 2:
+    //                 top_side++;
+    //                 bottom_side++;
+    //                 break;
+    //             case 3:
+    //                 top_side += 2;
+    //                 bottom_side++;
+    //                 break;
+    //         }
+    //     } else {
+    //         let sides = Math.floor((no_pipes - 4) / 4);
+    //         top_side = sides;
+    //         bottom_side = sides;
+    //         left_side = sides;
+    //         right_side = sides;
+    //         if (no_pipes % 4 == 0) {
+    //             top_side += 2;
+    //             bottom_side += 2;
+    //         } else {
+    //             let rem = (no_pipes - 4) % 4;
+    //             switch (rem) {
+    //                 case 1:
+    //                     left_side++;
+    //                     right_side++;
+    //                     top_side += 2;
+    //                     bottom_side++;
+    //                     break;
+    //                 case 2:
+    //                     left_side++;
+    //                     right_side++;
+    //                     top_side += 2;
+    //                     bottom_side += 2;
+    //                     break;
+    //                 case 3:
+    //                     left_side++;
+    //                     right_side++;
+    //                     top_side += 3;
+    //                     bottom_side += 2;
+    //                     break;
+    //             }
+    //         }
+    //     }
+    // }
 
-    let dpi = window.devicePixelRatio;
-    let width = (20 + top_side * (dist + w));
-    let height = (20 + 2 * (dist + h) + left_side * (dist + w));
-    c.style.width = width + "px";
-    c.style.height = height + "px";
-    c.width = width * dpi;
-    c.height = height * dpi;
-    ctx.scale(dpi, dpi);
+    // let dpi = window.devicePixelRatio;
+    // let width = (20 + top_side * (dist + w));
+    // let height = (20 + 2 * (dist + h) + left_side * (dist + w));
+    // c.style.width = width + "px";
+    // c.style.height = height + "px";
+    // c.width = width * dpi;
+    // c.height = height * dpi;
+    // ctx.scale(dpi, dpi);
 
-    for (let j = 0; j < (top_side + bottom_side + left_side + right_side); j++) {
-        let rotation = false;
-        let x, y;
-        if (j < top_side) {
-            let i = j;
-            x = 10 + i * (w + dist);
-            y = 10;
-            ctx.strokeRect(x, y, w, h);
-        }
-        else if (j < top_side + right_side) {
-            rotation = true;
-            let i = j - top_side;
-            x = 10 + (w - h) + (top_side - 1) * (w + dist);
-            y = 10 + dist + h + i * (dist + w);
-            ctx.strokeRect(x, y, h, w);
-        }
-        else if (j < top_side + right_side + bottom_side) {
-            let i = j - top_side - right_side;
-            x = 10 + i * (w + dist);
-            y = 10 + dist + h + (left_side) * (w + dist);
-            ctx.strokeRect(x, y, w, h);
-        }
-        else {
-            rotation = true;
-            let i = j - top_side - right_side - bottom_side;
-            x = 10;
-            y = 10 + dist + h + i * (dist + w);
-            ctx.strokeRect(x, y, h, w);
-        }
+    // for (let j = 0; j < (top_side + bottom_side + left_side + right_side); j++) {
+    //     let rotation = false;
+    //     let x, y;
+    //     if (j < top_side) {
+    //         let i = j;
+    //         x = 10 + i * (w + dist);
+    //         y = 10;
+    //         ctx.strokeRect(x, y, w, h);
+    //     }
+    //     else if (j < top_side + right_side) {
+    //         rotation = true;
+    //         let i = j - top_side;
+    //         x = 10 + (w - h) + (top_side - 1) * (w + dist);
+    //         y = 10 + dist + h + i * (dist + w);
+    //         ctx.strokeRect(x, y, h, w);
+    //     }
+    //     else if (j < top_side + right_side + bottom_side) {
+    //         let i = j - top_side - right_side;
+    //         x = 10 + i * (w + dist);
+    //         y = 10 + dist + h + (left_side) * (w + dist);
+    //         ctx.strokeRect(x, y, w, h);
+    //     }
+    //     else {
+    //         rotation = true;
+    //         let i = j - top_side - right_side - bottom_side;
+    //         x = 10;
+    //         y = 10 + dist + h + i * (dist + w);
+    //         ctx.strokeRect(x, y, h, w);
+    //     }
 
-        let font_size = 15;
-        ctx.font = font_size + "px Arial";
-        /**if (!rotation) ctx.fillText(resources[j].type, x+10, y+font_size);
-         else {
-            ctx.rotate(Math.PI/2);
-            ctx.fillText(resources[j].type, x+font_size, y+10);
-        }*/
+    //     let font_size = 15;
+    //     ctx.font = font_size + "px Arial";
+    //     /**if (!rotation) ctx.fillText(resources[j].type, x+10, y+font_size);
+    //      else {
+    //         ctx.rotate(Math.PI/2);
+    //         ctx.fillText(resources[j].type, x+font_size, y+10);
+    //     }*/
 
-    }
+    // }
 }
 /**
  for (let i = 0; i<top_side; i++) {
@@ -151,3 +225,5 @@ function drawPipes() {
  for (let i = 0; i<right_side; i++) {
         ctx.strokeRect(10 + (w-h) + (top_side-1)*(w+dist), 10+dist + h + i*(dist+w), h, w);
       }*/
+
+      

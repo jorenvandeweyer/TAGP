@@ -10,13 +10,16 @@ init(Req0, Opts) ->
 	Req = handler(Path, Method, HasBody, Req0),
 	{ok, Req, Opts}.
 
-handler([<<"data">> | _], <<"GET">>, _, Req) ->
-	Content0 = digitaltwin:get_data(),
-	Content = jiffy:encode(Content0),
-	request:reply(json, Content, Req);
-handler([<<"pipes">> | _], <<"GET">>, _, Req) ->
-	Content0 = digitaltwin:get_data(),
-	Content = jiffy:encode(Content0),
+handler([<<"system">> | _], <<"POST">>, true, Req) ->
+	{ok, Body, Req0} = cowboy_req:read_body(Req),
+	Type = request:fromJson(Body, type),
+	survivor:entry({type, Type}),
+	digitaltwin:add_resource(Type),
+	request:reply(json, ok, Req0);
+handler([<<"system">> | _], <<"GET">>, _, Req) ->
+	{ok, Data} = digitaltwin:get_data(),
+	survivor:entry({get_data, Data}),
+	Content = jiffy:encode(Data),
 	request:reply(json, Content, Req);
 handler([<<"dupbit">> | Path ], <<"GET">>, _, Req) ->
 	PartUrl = string:join([binary_to_list(X) || X <- Path], "/"),

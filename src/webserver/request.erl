@@ -1,6 +1,7 @@
 -module(request).
 -export([get/1, get/2, get/3, post/2, post/3]).
 -export([reply/3]).
+-export([fromJson/2]).
 
 get(Url) ->
     {ok, {_Status, _Headers, Content}} = httpc:request(get, {
@@ -32,6 +33,9 @@ post(json, Url, Data) ->
 post(Url, Data) ->
     post(json, Url, Data).
 
+reply(json, ok, Req) ->
+	Content = jiffy:encode({[{status, true}]}),
+    reply(json, Content, Req);
 reply(json, Json, Req) ->
     cowboy_req:reply(200, #{
         <<"content-type">> => <<"application/json">>
@@ -40,3 +44,9 @@ reply(text, Text, Req) ->
     cowboy_req:reply(200, #{
         <<"content-type">> => <<"text/plain">>
     }, Text, Req).
+
+fromJson(Body, Key) ->
+    {Json} = jiffy:decode(Body),
+    KeyBin = erlang:atom_to_binary(Key, latin1),
+    Type = proplists:get_value(KeyBin, Json),
+    erlang:binary_to_atom(Type, latin1).

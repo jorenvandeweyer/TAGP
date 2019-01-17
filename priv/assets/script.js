@@ -86,7 +86,7 @@ class System extends EventListener {
     }
 }
 
-async function request(path, method="get", data) {
+async function request(path, method="GET", data) {
     return fetch(path, {
         method,
         cache: "no-cache",

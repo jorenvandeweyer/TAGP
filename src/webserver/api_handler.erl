@@ -28,6 +28,9 @@ handler([<<"system">> | _], <<"GET">>, _, Req) ->
 	Content = jiffy:encode(Data),
 	request:reply(json, Content, Req);
 
+% handler([<<"pump">>, Pid, State | _], <<"POST">>, _, Req) ->
+
+
 handler([<<"instance">>, PidString | _], <<"GET">>, _, Req) ->
 	Pid = convert:bin_to_pid(PidString),
 	Data = digitaltwin:get_resource_data(Pid),

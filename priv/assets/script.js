@@ -37,7 +37,7 @@ class Instance {
     }
 
     async on() {
-        if (this.type !== "pumpInst") return;
+        if (!this.isPump) return;
         const data = await request(`/api/instance/${this.pid}`, "POST", {
             on: true
         });
@@ -45,11 +45,27 @@ class Instance {
     }
 
     async off() {
-        if (this.type !== "pumpInst") return;
+        if (!this.isPump) return;
         const data = await request(`/api/instance/${this.pid}`, "POST", {
             on: false
         });
         return data
+    }
+
+    get isPump() {
+        return this.type === "pumpInst";
+    }
+
+    get isPipe() {
+        return this.type === "pipeInst";
+    }
+
+    get isFlowMeter() {
+        return this.type === "flowMeterInst";
+    }
+
+    get isHeatExchanger() {
+        return this.type === "heatExchangerInst";
     }
 }
 
@@ -73,12 +89,16 @@ class System extends EventListener {
 
     async selectedOn() {
         if (!this.selected) return;
-        this.selected.on();
+        await this.selected.on();
+        await this.selected.getInfo();
+        this.emit("selected", this.selected);
     }
 
     async selectedOff() {
         if (!this.selected) return;
-        this.selected.off();
+        await this.selected.off();
+        await this.selected.getInfo();
+        this.emit("selected", this.selected);
     }
 
     async updateSystem() {
@@ -161,11 +181,27 @@ async function init() {
     });
 
     system.on("click", selectInstance);
+
     system.on("selected", (selected) => {
         document.querySelector("#info_title").innerText = `Info Window Pipe`;
         document.querySelector("#info_line1").innerText = `Flow Influence ${selected.info.flow_influence}`;
         document.querySelector("#info_line2").innerText = `Pid: ${selected.pid}`;
         document.querySelector("#info_line3").innerText = `Type: ${selected.type}`;
+        
+        document.querySelector("#onoroff").innerText = selected.info.onOrOff;
+        document.querySelector("#onoroff").style.display = selected.isPump ? "block" : "none";
+        document.querySelector("#turn_on").style.display = selected.isPump ? "block" : "none";
+        document.querySelector("#turn_off").style.display = selected.isPump ? "block" : "none";
+    });
+
+    system.on("unselected", () => {
+        document.querySelector("#info_title").innerText = `Info Window Pipe`;
+        document.querySelector("#info_line1").innerText = `Flow Influence -`;
+        document.querySelector("#info_line2").innerText = `Pid: -`;
+        document.querySelector("#info_line3").innerText = `Type: -`; 
+    
+        document.querySelector("#turn_on").style.display = "none";
+        document.querySelector("#turn_off").style.display = "none";    
     });
 
     return system;

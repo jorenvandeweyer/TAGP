@@ -26,7 +26,7 @@ start(_Type, _Args) ->
     env => #{dispatch => Dispatch}
   }),
 
-	%rivDir = code:priv_dir(main),
+	%privDir = code:priv_dir(main),
 	%ok, _} = cowboy:start_tls(https, [
 	%	{port, 8443},
 	%	{certfile, PrivDir ++ "/ssl/fullchain.pem"},

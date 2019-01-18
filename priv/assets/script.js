@@ -200,6 +200,7 @@ async function init() {
         document.querySelector("#info_line2").innerText = `Pid: -`;
         document.querySelector("#info_line3").innerText = `Type: -`; 
     
+        document.querySelector("#onoroff").style.display = "none";
         document.querySelector("#turn_on").style.display = "none";
         document.querySelector("#turn_off").style.display = "none";    
     });
@@ -439,6 +440,30 @@ async function drawPipes(system) {
         }
         ctx.restore();
     }
+}
+drawChart()
+
+async function drawChart(system) {
+    var ctx = document.getElementById("myChart").getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [1500,1600,1700,1750,1800,1850,1900,1950,1999,2050],
+            datasets: [{ 
+                data: [86,114,106,106,107,111,133,221,783,2478],
+                label: "Estimate Flow",
+                borderColor: "#3e95cd",
+                fill: false
+            }
+          ]
+        },
+        options: {
+            title: {
+                display: true,
+                text: 'Estimate Flow'
+            }
+        }
+    });
 }
 
 const system = init();
